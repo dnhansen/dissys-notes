@@ -1,0 +1,161 @@
+% Document setup
+\documentclass[article, a4paper, 11pt, oneside]{memoir}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[UKenglish]{babel}
+
+% Document info
+\newcommand\doctitle{Damgård, Nielsen, Orlandi:\\ \emph{Secure Distributed Systems}}
+\newcommand\docauthor{Danny Nygård Hansen}
+
+% Formatting and layout
+\usepackage[autostyle]{csquotes}
+\renewcommand{\mktextelp}{(\textellipsis\unkern)}
+\usepackage[final]{microtype}
+\usepackage{xcolor}
+\frenchspacing
+\usepackage{latex-sty/articlepagestyle}
+\usepackage{latex-sty/articlesectionstyle}
+
+% Fonts
+\usepackage{amssymb}
+\usepackage[largesmallcaps,partialup]{kpfonts}
+\DeclareSymbolFontAlphabet{\mathrm}{operators} % https://tex.stackexchange.com/questions/40874/kpfonts-siunitx-and-math-alphabets
+\linespread{1.06}
+% \let\mathfrak\undefined
+% \usepackage{eufrak}
+\DeclareMathAlphabet\mathfrak{U}{euf}{m}{n}
+\SetMathAlphabet\mathfrak{bold}{U}{euf}{b}{n}
+% https://tex.stackexchange.com/questions/13815/kpfonts-with-eufrak
+\usepackage{inconsolata}
+
+% Hyperlinks
+\usepackage{hyperref}
+\definecolor{linkcolor}{HTML}{4f4fa3}
+\hypersetup{%
+	pdftitle=\doctitle,
+	pdfauthor=\docauthor,
+	colorlinks,
+	linkcolor=linkcolor,
+	citecolor=linkcolor,
+	urlcolor=linkcolor,
+	bookmarksnumbered=true
+}
+
+% Equation numbering
+\numberwithin{equation}{chapter}
+
+% Footnotes
+\footmarkstyle{\textsuperscript{#1}\hspace{0.25em}}
+
+% Mathematics
+\usepackage{latex-sty/basicmathcommands}
+\usepackage{latex-sty/framedtheorems}
+\usepackage{latex-sty/probabilitycommands}
+\usepackage{tikz-cd}
+\tikzcdset{arrow style=math font} % https://tex.stackexchange.com/questions/300352/equalities-look-broken-with-tikz-cd-and-math-font
+\usetikzlibrary{babel}
+
+% Lists
+\usepackage{enumitem}
+\setenumerate[0]{label=\normalfont(\arabic*)}
+
+% Bibliography
+\usepackage[backend=biber, style=authoryear, maxcitenames=2, useprefix]{biblatex}
+\addbibresource{references.bib}
+
+% Title
+\title{\doctitle}
+\author{\docauthor}
+
+% Sectioned proofs
+\renewcommand{\mylistlabelfont}[1]{{\normalfont\color{linkcolor}\textit{#1}:}}
+\newlist{notelist}{description}{1}
+\setlist[notelist]{leftmargin=0pt, parsep=0pt, listparindent=\parindent, font=\mylistlabelfont}
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+\newcommand{\gate}{\textsc}
+\newcommand{\gateNOT}{\gate{not}}
+\newcommand{\gateNOR}{\gate{nor}}
+\newcommand{\gateAND}{\gate{and}}
+\newcommand{\gateOR}{\gate{or}}
+\newcommand{\gateXOR}{\gate{xor}}
+
+\usepackage{siunitx}
+% TODO: Update TeXLive so I can update packages.
+% The update uses \qty instead of \SI
+
+% Code
+\usepackage{listings}
+% \lstdefinelanguage{newSQL}{
+%     language=SQL,
+%     keywordstyle = \bfseries,
+%     morekeywords={REGEXP, BOOLEAN, REFERENCES, AFTER, NEW},
+%     moredelim = [s][keywordstyle]{FOR\ EACH}{ROW},
+%     deletekeywords={LEVEL}
+% }
+\makeatletter
+\lstset{
+    basicstyle=\ttfamily\lst@ifdisplaystyle\footnotesize\fi,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    % language=Java,
+    % deletekeywords={return},
+    showstringspaces=false,
+    keepspaces
+}
+\makeatother
+
+\definecolor{lightgray}{gray}{0.9}
+\newcommand{\inlinecode}[1]{\colorbox{lightgray}{\vphantom{\texttt{jk}}\lstinline$#1$}}
+\renewcommand{\inlinecode}{\lstinline}
+
+\usepackage{booktabs}
+
+
+% https://tex.stackexchange.com/questions/167/how-to-cross-reference-items-in-description-lists
+\newcounter{desccount}
+\newcommand{\descitem}[2]{%
+  \item[#1] \refstepcounter{desccount}\label{#2}
+}
+\newcommand{\descref}[2]{\hyperref[#1]{#2}}
+
+
+\begin{document}
+
+\maketitle
+
+\addtocounter{chapter}{4}
+\chapter{Confidentiality}
+
+\section{Confidentiality, Secret-Key Systems}
+
+\newcommand{\xor}{\oplus}
+
+\begin{notelist}
+\item[One-time pad]
+We give a different (and complete!) proof of Theorem~5.1, which says that the ciphertext produced by a one-time pad is uniformly distributed.
+
+Let $m_1 \cdots m_n$ be the message, and let $\rvar{K}_1, \ldots, \rvar{K}_n$ be i.i.d. Bernoulli random variables with parameter $1/2$ denoting the bits of the key. The ciphertext then consists of bits $\rvar{C}_i = m_i \xor \rvar{K}_i$, which themselves are random variables. The claim is then that given bits $c_1, \ldots, c_n$, we have
+%
+\begin{equation*}
+    P(\rvar{C}_1 = c_1, \ldots, \rvar{C}_n = c_n) = 2^{-n}.
+\end{equation*}
+%
+Notice now that $m_i \xor \rvar{K}_i = c_i$ if and only if $\rvar{K}_i = m_i \xor c_i$. Since the $\rvar{K}_i$ are independent, it thus follows that
+%
+\begin{align*}
+    P(\rvar{C}_1 = c_1, \ldots, \rvar{C}_n = c_n)
+        &= P(m_1 \xor \rvar{K}_1 = c_1, \ldots, m_n \xor \rvar{K}_n = c_n) \\
+        &= P(\rvar{K}_1 = m_1 \xor c_1, \ldots, \rvar{K}_n = m_n \xor c_n) \\
+        &= \bigprod_{i=1}^n P(\rvar{K}_i = m_i \xor c_i) \\
+        &= 2^{-n}
+\end{align*}
+%
+as desired.
+\end{notelist}
+
+\end{document}
